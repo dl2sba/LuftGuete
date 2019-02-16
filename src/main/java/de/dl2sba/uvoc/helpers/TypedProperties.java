@@ -1,10 +1,6 @@
-package de.dl2sba.common;
+package de.dl2sba.uvoc.helpers;
 
 import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.Toolkit;
 import java.util.Enumeration;
 import java.util.Properties;
 
@@ -127,38 +123,6 @@ public class TypedProperties extends Properties {
 
 	public void putLong(String key, long value) {
 		setProperty(key, Long.toString(value));
-	}
-
-	public void restoreWindowPosition(String prefix, Component wnd, Point point) {
-		int x = getInteger(prefix + ".X", (int) point.getX());
-		int y = getInteger(prefix + ".Y", (int) point.getY());
-
-		Dimension sz = Toolkit.getDefaultToolkit().getScreenSize();
-
-		if (x + wnd.getWidth() > sz.width) {
-			x = sz.width - wnd.getWidth();
-		}
-		if (y + wnd.getHeight() > sz.height) {
-			y = sz.height - wnd.getHeight();
-		}
-		wnd.setLocation(x, y);
-	}
-
-	public void restoreWindowSize(String prefix, Component wnd, Dimension sz) {
-		int w = getInteger(prefix + ".Width", (int) sz.getWidth());
-		int h = getInteger(prefix + ".Height", (int) sz.getHeight());
-		wnd.setSize(w, h);
-		wnd.setPreferredSize(wnd.getSize());
-	}
-
-	public void storeWindowPosition(String prefix, Component wnd) {
-		putInteger(prefix + ".X", wnd.getX());
-		putInteger(prefix + ".Y", wnd.getY());
-	}
-
-	public void storeWindowSize(String prefix, Component wnd) {
-		putInteger(prefix + ".Width", wnd.getWidth());
-		putInteger(prefix + ".Height", wnd.getHeight());
 	}
 
 	/**

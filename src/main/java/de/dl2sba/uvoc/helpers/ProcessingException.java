@@ -1,4 +1,4 @@
-package de.dl2sba.common;
+package de.dl2sba.uvoc.helpers;
 
 /**
  * Filderwetter - framework for weather aquisistion and analysis

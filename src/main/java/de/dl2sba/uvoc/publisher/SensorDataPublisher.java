@@ -57,7 +57,6 @@ public class SensorDataPublisher implements MqttCallback {
 		this.mqttClient = new MqttClient(props.getProperty("MQTT.Server"), clientId, mqttPersistence);
 		this.mqttClient.setCallback(this);
 
-		int nodeId = props.getInteger("MQTT.nodeId", 1234567);
 
 		MqttConnectOptions connOpts = new MqttConnectOptions();
 		connOpts.setCleanSession(true);
@@ -65,6 +64,7 @@ public class SensorDataPublisher implements MqttCallback {
 		connOpts.setUserName(props.getProperty("MQTT.User"));
 		this.mqttClient.connect(connOpts);
 
+		int nodeId = props.getInteger("MQTT.nodeId", 1234567);
 		publishOneSensor(nodeId, props.getInteger("MQTT.sensor.temp.id", 0), data.getTemperature());
 		publishOneSensor(nodeId, props.getInteger("MQTT.sensor.humidity.id", 1), data.getHumidity());
 		publishOneSensor(nodeId, props.getInteger("MQTT.sensor.pressure.id", 2), data.getPressure());

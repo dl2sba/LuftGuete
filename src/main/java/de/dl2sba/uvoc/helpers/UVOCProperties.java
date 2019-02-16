@@ -9,8 +9,6 @@ import java.util.Properties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import de.dl2sba.common.TypedProperties;
-
 public class UVOCProperties extends TypedProperties {
 
 	/**

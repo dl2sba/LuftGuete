@@ -12,8 +12,8 @@ import java.util.jar.Manifest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import de.dl2sba.common.ProcessingException;
 import de.dl2sba.uvoc.UVOCReader;
+import de.dl2sba.uvoc.helpers.ProcessingException;
 import de.dl2sba.uvoc.helpers.UVOCProperties;
 
 public class UVOCRunner {

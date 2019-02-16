@@ -6,7 +6,8 @@ import com.google.gson.annotations.SerializedName;
 /**
  * http://www.jsonschema2pojo.org/
  * 
- * @param iaqAccuracy
+ * @author dietmar
+ *
  */
 public class UVOCSensorData {
 
