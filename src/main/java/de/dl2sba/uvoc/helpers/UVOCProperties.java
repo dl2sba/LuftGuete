@@ -55,7 +55,7 @@ public class UVOCProperties extends TypedProperties {
 				// no use default in code-tree
 				propertyFile = "./UVOC.properties";
 			}
-			logger.info("Loading properties from [{}]", propertyFile);
+			logger.debug("Loading properties from [{}]", propertyFile);
 
 			// load properties
 			singleton.load(propertyFile, new Properties());

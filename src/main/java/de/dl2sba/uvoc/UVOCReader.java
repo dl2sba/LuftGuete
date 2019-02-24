@@ -2,7 +2,6 @@ package de.dl2sba.uvoc;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Enumeration;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,13 +31,13 @@ public class UVOCReader {
 		logger.traceEntry(portname);
 		CommPortIdentifier rc = null;
 
-		Enumeration<CommPortIdentifier> portList = CommPortIdentifier.getPortIdentifiers();
+		var portList = CommPortIdentifier.getPortIdentifiers();
 		while (portList.hasMoreElements()) {
 			CommPortIdentifier aPortId = portList.nextElement();
 			if ((aPortId.getPortType() == CommPortIdentifier.PORT_SERIAL)) {
-				logger.info("serial port [{}] found", aPortId.getName());
+				logger.debug("serial port [{}] found", aPortId.getName());
 				if (aPortId.getName().equals(portname)) {
-					logger.info("desired port named [{}] found", portname);
+					logger.debug("desired port named [{}] found", portname);
 					rc = aPortId;
 					break;
 				}
@@ -48,36 +47,75 @@ public class UVOCReader {
 		return rc;
 	}
 
-	public UVOCReader() throws ProcessingException {
+	/**
+	 * 
+	 * @throws ProcessingException
+	 */
+	public UVOCReader() {
 		logger.traceEntry();
-		setupComPort();
-		setupSensor();
 		logger.traceExit();
 	}
 
+	/**
+	 * read and discard all serial character currently available at serial port
+	 */
+	public void flushInput() {
+		logger.traceEntry();
+		if (this.port != null) {
+			InputStream input;
+			try {
+				input = this.port.getInputStream();
+				int numChars = input.available();
+				if (numChars > 0) {
+					input.readNBytes(numChars);
+					logger.debug("{} bytes skipped on input stream", numChars);
+				}
+			} catch (IOException e) {
+				logger.catching(e);
+			}
+		}
+		logger.traceExit();
+	}
+
+	/**
+	 * Setup the sensor.
+	 * 
+	 * Means, set the data mode to JSON via [UVOC.json] and set interval to
+	 * [UVOC.datarate]
+	 * 
+	 * @throws ProcessingException
+	 */
 	private void setupSensor() throws ProcessingException {
 		logger.traceEntry();
 		try {
 			this.port.getOutputStream().write(props.getProperty("UVOC.json", "j").getBytes());
+			logger.info("sensor switched to JSON format");
 			Thread.sleep(1000);
+
 			this.port.getOutputStream().write(props.getProperty("UVOC.datarate", "4").getBytes());
+			logger.info("sensor switched desired data rate");
 			Thread.sleep(1000);
 		} catch (InterruptedException | IOException e) {
-			logger.catching(e);
 			throw new ProcessingException(e);
 		}
 		logger.traceExit();
 	}
 
+	/**
+	 * search for the defined serial port and try to open it
+	 * 
+	 * @throws ProcessingException
+	 *             When port not found or open failed
+	 */
 	protected void setupComPort() throws ProcessingException {
 		logger.traceEntry();
 		String comPortName = props.getProperty("UVOC.ComPort", "COM5");
-		logger.info("searching for port [{}]", comPortName);
+		logger.debug("searching for port [{}]", comPortName);
 		try {
-			CommPortIdentifier portId = getPortIDForName(comPortName);
+			var portId = getPortIDForName(comPortName);
 			if (portId != null) {
 				this.port = (SerialPort) portId.open("UVOC", 1);
-				logger.info("port opened");
+				logger.debug("port opened");
 				this.port.setFlowControlMode(SerialPort.FLOWCONTROL_NONE);
 				this.port.setSerialPortParams(9600, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
 				this.port.enableReceiveTimeout(1000);
@@ -89,7 +127,6 @@ public class UVOCReader {
 				throw new ProcessingException("serial port not found");
 			}
 		} catch (PortInUseException | UnsupportedCommOperationException e) {
-			logger.catching(e);
 			throw new ProcessingException(e);
 		}
 		logger.traceExit();
@@ -100,15 +137,18 @@ public class UVOCReader {
 	 */
 	protected void processLine() {
 		logger.traceEntry();
+		String line = null;
 		try {
-			String line = this.serialBuffer.toString();
-			logger.info("response [{}]", line);
+			line = this.serialBuffer.toString();
+			logger.debug("response [{}]", line);
 			UVOCSensorData readSensorData = new Gson().fromJson(line, UVOCSensorData.class);
 			if (readSensorData != null) {
 				new SensorDataPublisher().publish(readSensorData);
 			}
+
+			flushInput();
 		} catch (JsonSyntaxException e) {
-			logger.info("failed to parse JSON info");
+			logger.warn("failed to parse JSON message [{}]", line);
 		} catch (MqttException e) {
 			logger.catching(e);
 		}
@@ -117,7 +157,8 @@ public class UVOCReader {
 	}
 
 	/**
-	 * Read data from the open serial port.
+	 * If the port ist currently not set, try to open the port. Then read data
+	 * from the open serial port.
 	 * 
 	 * Maximum of 1000 chars are read, rest is discarded.
 	 * 
@@ -125,10 +166,16 @@ public class UVOCReader {
 	 * process the line.
 	 * 
 	 * @param endWithLF
+	 * @throws ProcessingException
 	 */
-	void readSerialChar(boolean endWithLF) {
+	public void run(boolean endWithLF) throws ProcessingException {
 		logger.traceEntry();
 		try {
+			if (this.port == null) {
+				setupComPort();
+				setupSensor();
+				flushInput();
+			}
 			InputStream stream = this.port.getInputStream();
 			while (stream.available() > 0) {
 				int ch = stream.read();
@@ -146,18 +193,17 @@ public class UVOCReader {
 					}
 				}
 			}
+		} catch (ProcessingException e) {
+			if (this.port != null) {
+				this.port.close();
+				this.port = null;
+			}
+			throw e;
 		} catch (IOException e) {
-			logger.catching(e);
+			this.port.close();
+			this.port = null;
+			throw new ProcessingException(e);
 		}
-		logger.traceExit();
-	}
-
-	/**
-	 * 
-	 */
-	public void run() {
-		logger.traceEntry();
-		readSerialChar(true);
 		logger.traceExit();
 	}
 

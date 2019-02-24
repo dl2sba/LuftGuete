@@ -39,7 +39,7 @@ public class SensorDataPublisher implements MqttCallback {
 		String val = Double.toString(value);
 
 		this.mqttClient.publish(topic, val.getBytes(), qos, false);
-		logger.info("Published {} to {}/{}", value, nodeId, sensorId);
+		logger.debug("Published {} to {}/{}", value, nodeId, sensorId);
 		logger.traceExit();
 	}
 

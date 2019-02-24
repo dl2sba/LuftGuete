@@ -2,10 +2,7 @@ package de.dl2sba.uvoc.runner;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
@@ -16,12 +13,25 @@ import de.dl2sba.uvoc.UVOCReader;
 import de.dl2sba.uvoc.helpers.ProcessingException;
 import de.dl2sba.uvoc.helpers.UVOCProperties;
 
+/**
+ * 
+ * @author dietmar
+ *
+ */
 public class UVOCRunner {
 
 	protected static final Logger logger = LogManager.getLogger(UVOCRunner.class.getName());
 	protected static final UVOCProperties props = UVOCProperties.getSingleton();
 	protected boolean endAll = false;
 
+	/**
+	 * Main loop.
+	 * 
+	 * Create an instance and see what happens
+	 * 
+	 * @param args
+	 *            not used
+	 */
 	public static void main(String[] args) {
 		logger.traceEntry();
 		new UVOCRunner();
@@ -29,13 +39,19 @@ public class UVOCRunner {
 		System.exit(0);
 	}
 
+	/**
+	 * Dump application information data from the manifest. Register the system
+	 * shutdown hook.
+	 * 
+	 * Then go into endless loop.
+	 */
 	public UVOCRunner() {
 		logger.traceEntry();
 		logger.info("***************************************************************");
 		logger.info("Application information:");
 		Attributes attributes = getAttributesFromManifest();
-		Set<Entry<Object, Object>> entries = attributes.entrySet();
-		Iterator<Entry<Object, Object>> it = entries.iterator();
+		var entries = attributes.entrySet();
+		var it = entries.iterator();
 		while (it.hasNext()) {
 			Map.Entry<Object, Object> pair = it.next();
 			logger.info("   {} : {}", pair.getKey(), pair.getValue());
@@ -44,7 +60,7 @@ public class UVOCRunner {
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
 			public void run() {
-				logger.info("Shutdown hook ran!");
+				logger.warn("Shutdown hook ran!");
 				endAll = true;
 			}
 		});
@@ -56,15 +72,20 @@ public class UVOCRunner {
 		sleepTime *= 1000;
 
 		UVOCReader instance;
-		try {
-			instance = new UVOCReader();
-			while (!endAll) {
+		instance = new UVOCReader();
+		while (!endAll) {
+			try {
 				// sleep one sec
-				instance.run();
+				instance.run(props.getBoolean("Runner.endWithLF", true));
 				Thread.sleep(sleepTime);
+			} catch (InterruptedException | ProcessingException e) {
+				logger.catching(e);
+				try {
+					Thread.sleep(10 * sleepTime);
+				} catch (InterruptedException e1) {
+					logger.catching(e);
+				}
 			}
-		} catch (ProcessingException | InterruptedException e1) {
-			logger.catching(e1);
 		}
 		logger.info("Main instance ended");
 		logger.traceExit();
