@@ -4,14 +4,12 @@ Java client to pull sensor data from an attached uThing::VOC sensor and publish 
 ## Basic function
 Every time the uVOC sends sensor data it is published to the MQTT broker.
 
-... more to come ...
-
 ## Polling
 This code is expected to run forever. The main loop is defined like this:
 
 ## Running
 Download the JAR with the dependencies.
-Create a file named "UVOC.properties" near to the JAR with the following content:
+Create a file named **UVOC.properties** near to the JAR with the following content:
 ```
 MQTT.Password=<<password>>
 MQTT.Server=tcp\://<<IP>>\:<<port>>
@@ -31,6 +29,8 @@ UVOC.ComPort=<<the serial port>>
 UVOC.datarate=4
 UVOC.json=j
 ```
+
+Launch the JAR with **java -jar uVOC-1.5-jar-with-dependencies.jar**
 
 ## credits
 This work is based on the published information from Ohmtech.io  / uThing::VOC
