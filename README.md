@@ -4,6 +4,8 @@ Java client to pull sensor data from an attached uThing::VOC sensor and publish 
 ## Basic function
 Every time the uVOC sends sensor data it is published to the MQTT broker.
 
+The truth is in the code ;-)
+
 ## Polling
 This code is expected to run forever. The main loop is defined like this:
 
