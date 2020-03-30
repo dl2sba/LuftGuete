@@ -36,17 +36,17 @@ Create a file named **UVOC.log4j2.xml** near to the JAR with the following conte
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
 <Configuration status="info" monitorInterval="30">
-        <Appenders>
-                <Console name="Console" target="SYSTEM_OUT">
-                        <PatternLayout
-                                pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{1} %M - %msg%n" />
-                </Console>
-        </Appenders>
-        <Loggers>
-                <Root level="info">
-                        <AppenderRef ref="Console" />
-                </Root>
-        </Loggers>
+	<Appenders>
+		<Console name="Console" target="SYSTEM_OUT">
+			<PatternLayout
+				pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{1} %M - %msg%n" />
+		</Console>
+	</Appenders>
+	<Loggers>
+		<Root level="info">
+			<AppenderRef ref="Console" />
+		</Root>
+	</Loggers>
 </Configuration>
 ```
 
