@@ -1,0 +1,1 @@
+nohup /usr/bin/java -Dlog4j.configurationFile=/usr/local/bin/UVOC.log4j2.xml -DUVOC.properties=/usr/local/bin/UVOC.properties -jar /usr/local/bin/uVOC-1.5-jar-with-dependencies.jar >/var/log/UVOC.log 2>&1
