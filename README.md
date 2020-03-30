@@ -31,7 +31,7 @@ UVOC.ComPort=<<the serial port>>
 UVOC.datarate=4
 UVOC.json=j
 ```
-Create a file named **UVOC.properties** near to the JAR with the following content:
+Create a file named **UVOC.log4j2.xml** near to the JAR with the following content:
 ```
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
@@ -51,7 +51,7 @@ Create a file named **UVOC.properties** near to the JAR with the following conte
 ```
 
 
-Launch the JAR with **java -Dlog4j.configurationFile=<pathTo>/UVOC.log4j2.xml -DUVOC.properties=<pathTo>/UVOC.properties-jar uVOC-1.5-jar-with-dependencies.jar**
+Launch the JAR with **java -Dlog4j.configurationFile=UVOC.log4j2.xml -DUVOC.properties=UVOC.properties-jar uVOC-1.5-jar-with-dependencies.jar**
 
 ## credits
 This work is based on the published information from Ohmtech.io  / uThing::VOC
