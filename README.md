@@ -1,3 +1,4 @@
+
 # uVOC
 Java client to pull sensor data from an attached uThing::VOC sensor and publish it to an MQTT broker
 
@@ -9,7 +10,7 @@ The truth is in the code ;-)
 ## Polling
 This code is expected to run forever. The main loop is defined like this:
 
-## Running
+## Running from commandline
 Download the JAR with the dependencies.
 Create a file named **UVOC.properties** near to the JAR with the following content:
 ```
@@ -49,9 +50,44 @@ Create a file named **UVOC.log4j2.xml** near to the JAR with the following conte
 	</Loggers>
 </Configuration>
 ```
+Launch the JAR with **java -Dlog4j.configurationFile=UVOC.log4j2.xml -DUVOC.properties=UVOC.properties-jar uVOC-1.6-jar-with-dependencies.jar**
 
 
-Launch the JAR with **java -Dlog4j.configurationFile=UVOC.log4j2.xml -DUVOC.properties=UVOC.properties-jar uVOC-1.5-jar-with-dependencies.jar**
+## Running using systemd
+Tested on an Raspberry Pi 3 with "Linux UVOC 4.19.97-v7+ #1294 SMP Thu Jan 30 13:15:58 GMT 2020 armv7l GNU/Linux" based on this [post](https://stackoverflow.com/questions/21503883/spring-boot-application-as-a-service/22121547#22121547).
+
+Copy the following files to the desired *[location]*:
+ - UVOC.properties
+ - UVOC.log4j2.xml
+ - uVOC-1.6-jar-with-dependencies.jar
+
+Easiest way is to copy them into the users home directory.
+
+Create file **/etc/systemd/UVOC.service** with the following content:
+```
+[Unit]
+Description=UVOC Service
+
+[Service]
+#  User must be member of dialout group to have access to serial port
+User=[desired user to run as]
+
+# The configuration file application.properties should be here:
+WorkingDirectory=[location]
+ExecStart=/usr/bin/java -Dlog4j.configurationFile=UVOC.log4j2.xml -DUVOC.properties=UVOC.properties -jar uVOC-1.6-jar-with-dependencies.jar
+SuccessExitStatus=143
+TimeoutStopSec=10
+Restart=on-failure
+RestartSec=30
+
+[Install]
+WantedBy=multi-user.target
+```
+After creating this file reload the systemd config with **sudo systemctl daemon-reload**.
+Starting the daemon manually **sudo systemctl start UVOC**.
+Stopping the daemon manually **sudo systemctl stop UVOC**.
+Query the status of the daemon  **sudo systemctl status UVOC**.
+
 
 ## credits
 This work is based on the published information from Ohmtech.io  / uThing::VOC
