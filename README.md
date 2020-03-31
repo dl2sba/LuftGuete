@@ -84,8 +84,11 @@ RestartSec=30
 WantedBy=multi-user.target
 ```
 After creating this file reload the systemd config with **sudo systemctl daemon-reload**.
+
 Starting the daemon manually **sudo systemctl start UVOC**.
+
 Stopping the daemon manually **sudo systemctl stop UVOC**.
+
 Query the status of the daemon  **sudo systemctl status UVOC**.
 
 
